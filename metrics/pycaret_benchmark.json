@@ -1,6 +1,6 @@
 {
   "pycaret_model": "Pipeline",
-  "pycaret_rmse": 11.785245759467935,
+  "pycaret_rmse": 11.785245759467937,
   "pycaret_r2": 0.9171140061537898,
   "lab3_rmse": 15.752653437299083,
   "lab3_r2": 0.8519149216158644
