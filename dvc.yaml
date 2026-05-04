@@ -1,23 +1,71 @@
-# DVC pipeline for the Pune Price Prediction project.
+# DVC pipeline for the Pune Price Prediction project — full DAG.
 #
-# This file declares the training stage. DVC reads it to figure out what
-# to re-run when something changes:
+# Three stages, declared in dependency order:
 #
-#   * change params.yaml          → train re-runs, model rebuilt
-#   * change mlops/utils.py       → train re-runs (it's a code dep)
-#   * change model_features.csv   → train re-runs (data changed)
-#   * change frontend/index.html  → nothing re-runs (not a dep)
+#   clean    raw Excel       → data_cleaned.csv
+#   features data_cleaned    → model_features.csv + helper pkls
+#   train    feature matrix  → trained model + interval estimate + metrics
 #
 # Reproduce the entire pipeline:    dvc repro
 # Show the latest metrics:          dvc metrics show
 # Show the dependency graph:        dvc dag
 #
-# Note: Labs 1 and 2 (cleaning + feature engineering) are not declared as
-# stages here because they live in notebooks. In a fully scripted project
-# you'd add `clean` and `features` stages above `train`. The pattern is
-# documented in MLOPS_LAB.md.
+# What changed vs the v1 dvc.yaml:
+#   * The v1 only declared `train`. Lab 1 (cleaning) and Lab 2 (feature
+#     engineering) lived in notebooks, so a learner who edited a cleaning
+#     rule could regenerate the feature CSV outside DVC's awareness, and
+#     `dvc repro` would happily skip retraining. The pipeline was half-blind.
+#   * v2 (this file) extracts those notebooks into mlops/clean_data.py and
+#     mlops/build_features.py. Now the entire path from raw .xlsx to the
+#     trained model is one DVC graph: change anything → only the affected
+#     stages re-run, and DVC tracks every intermediate output.
+#
+# How DVC decides what to re-run:
+#   * change params.yaml ridge.alpha            → train re-runs
+#   * change mlops/clean_data.py                → clean + features + train re-run
+#   * change Pune Real Estate Data.xlsx         → clean + features + train re-run
+#   * change mlops/build_features.py            → features + train re-run
+#   * change frontend/index.html                → nothing re-runs (not a dep)
+#
+# Try it:
+#     dvc repro                # nothing to do — pipeline is up to date
+#     touch mlops/utils.py     # mark as modified
+#     dvc repro                # only `train` re-runs (it's the only stage that depends on utils.py)
 
 stages:
+
+  # ── Stage 1: clean ────────────────────────────────────────────────────────
+  # Raw Excel → cleaned CSV. No randomness, no plots — pure transformations.
+  clean:
+    cmd: python -m mlops.clean_data
+    deps:
+      - mlops/clean_data.py
+      - "Pune Real Estate Data.xlsx"
+    outs:
+      - data_cleaned.csv
+
+  # ── Stage 2: features ─────────────────────────────────────────────────────
+  # NLP feature engineering: POS counts, bigrams, target encoding.
+  # Five small pkl artifacts are also produced — they're consumed by the
+  # FastAPI inference pipeline (src/inference.py).
+  features:
+    cmd: python -m mlops.build_features
+    deps:
+      - mlops/build_features.py
+      - data_cleaned.csv
+    outs:
+      - model_features.csv
+      - model_target.npy
+      - model/count_vectorizer.pkl
+      - model/sub_area_price_map.pkl
+      - model/amenities_score_price_map.pkl
+      - model/feature_cols.pkl
+      - model/all_feature_names.pkl
+
+  # ── Stage 3: train ────────────────────────────────────────────────────────
+  # The "production" trainer. Reads params.yaml, fits the Voting Regressor,
+  # writes the model + interval estimate + a metrics JSON DVC can read.
+  # No MLflow logging here on purpose — see mlops/mlflow_train_v2.py for that.
   train:
     cmd: python -m mlops.train
     deps:
@@ -37,4 +85,4 @@ stages:
       - model/interval_est.pkl
     metrics:
       - metrics/train_metrics.json:
-          cache: false       # metrics file is small; keep it in Git, not DVC cache
+          cache: false       # tiny; keep it in Git so `dvc metrics diff` works across commits
