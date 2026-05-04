@@ -79,7 +79,7 @@ def main() -> dict:
         session_id=params["data"]["random_state"],
         train_size=0.8,
         normalize=True,
-        verbose=False,
+        verbose=True,
         html=False,
         log_experiment=False,    # we run a separate MLflow script
     )
