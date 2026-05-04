@@ -1,0 +1,23 @@
+# MLOps tooling (Module 2 Lab 5) — separate from the production API requirements
+# so the FastAPI container stays small.
+#
+# Install AFTER requirements.txt:
+#     pip install -r requirements.txt
+#     pip install -r requirements-mlops.txt
+
+# ─── Experiment tracking ────────────────────────────────────────────
+mlflow>=3.0.0,<4.0.0
+pyyaml>=6.0
+
+# ─── Data versioning ────────────────────────────────────────────────
+# dvc[s3] gives us the boto3 driver so an S3 remote works out of the box.
+# If you only ever use a local folder or DagsHub remote, plain `dvc` is enough.
+dvc[s3]>=3.0.0,<4.0.0
+
+# ─── Unified collaboration platform ─────────────────────────────────
+dagshub>=0.4.0
+
+# ─── AutoML benchmark ───────────────────────────────────────────────
+# PyCaret pulls a heavy dependency tree (XGBoost, LightGBM, CatBoost).
+# First install on a clean machine takes 2-3 minutes.
+pycaret>=3.3.0

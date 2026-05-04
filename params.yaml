@@ -1,0 +1,30 @@
+# Hyperparameters and run settings for the MLOps pipeline.
+#
+# Edit values here, NOT in code. DVC reads this file to decide whether
+# to re-run a stage (change a value → next `dvc repro` re-trains).
+#
+# Every script under mlops/ reads these values via mlops.utils.load_params().
+
+data:
+  test_size: 0.2          # fraction of rows held out for evaluation
+  random_state: 42        # matches Lab 3 — keep this fixed for comparability
+
+ridge:
+  alpha: 1.0              # L2 regularization strength
+
+lasso:
+  alpha: 0.1              # L1 regularization strength
+  max_iter: 10000         # extra iterations because the design matrix is wide
+
+voting:
+  weights: null           # null → equal vote for LR / Ridge / Lasso
+
+interval:
+  confidence: 0.95        # 95% prediction interval — used by inference.py
+
+# Used by mlops/mlflow_sweep.py to log one MLflow run per alpha value.
+sweep:
+  alphas: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+
+mlflow:
+  experiment_name: M2_Pune_Real_Estate_Price

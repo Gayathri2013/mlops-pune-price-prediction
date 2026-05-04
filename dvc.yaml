@@ -1,0 +1,40 @@
+# DVC pipeline for the Pune Price Prediction project.
+#
+# This file declares the training stage. DVC reads it to figure out what
+# to re-run when something changes:
+#
+#   * change params.yaml          → train re-runs, model rebuilt
+#   * change mlops/utils.py       → train re-runs (it's a code dep)
+#   * change model_features.csv   → train re-runs (data changed)
+#   * change frontend/index.html  → nothing re-runs (not a dep)
+#
+# Reproduce the entire pipeline:    dvc repro
+# Show the latest metrics:          dvc metrics show
+# Show the dependency graph:        dvc dag
+#
+# Note: Labs 1 and 2 (cleaning + feature engineering) are not declared as
+# stages here because they live in notebooks. In a fully scripted project
+# you'd add `clean` and `features` stages above `train`. The pattern is
+# documented in MLOPS_LAB.md.
+
+stages:
+  train:
+    cmd: python -m mlops.train
+    deps:
+      - mlops/train.py
+      - mlops/utils.py
+      - model_features.csv
+      - model_target.npy
+    params:
+      - data.test_size
+      - data.random_state
+      - ridge.alpha
+      - lasso.alpha
+      - lasso.max_iter
+      - interval.confidence
+    outs:
+      - model/property_price_prediction_voting.sav
+      - model/interval_est.pkl
+    metrics:
+      - metrics/train_metrics.json:
+          cache: false       # metrics file is small; keep it in Git, not DVC cache

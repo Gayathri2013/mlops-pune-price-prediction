@@ -1,0 +1,47 @@
+# ── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.pytest_cache/
+
+# ── Virtual environments ──────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── IDE / editor ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# ── Secrets ────────────────────────────────────────────────────────────────
+.env
+.env.local
+*.pem
+*.key
+
+# ── MLflow local store ────────────────────────────────────────────────────
+mlruns/
+mlflow.db
+mlflow.db-journal
+mlartifacts/
+
+# ── DVC ────────────────────────────────────────────────────────────────────
+# Never commit the DVC cache or the local-folder remote
+.dvc/cache
+.dvc/tmp
+.dvc/config.local
+dvc_remote/
+
+# ── PyCaret leftovers ──────────────────────────────────────────────────────
+logs.log
+catboost_info/
+
+# ── Notebook checkpoints ──────────────────────────────────────────────────
+.ipynb_checkpoints/
+/model_features.csv
+/model_target.npy

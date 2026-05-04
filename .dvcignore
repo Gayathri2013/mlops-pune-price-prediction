@@ -1,0 +1,18 @@
+# Patterns ignored by DVC. Same idea as .gitignore but for DVC operations.
+
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Don't try to track the MLflow store with DVC — it has its own backend.
+mlruns/
+mlflow.db
+mlartifacts/
+
+# Don't track the DVC remote folder itself with DVC. That would be weird.
+dvc_remote/
+
+# Don't track outputs of derived analysis runs (those are reports, not data)
+metrics/*.png
