@@ -8,7 +8,7 @@ Run from the project root:
     python -m mlops.mlflow_train
 
 View results:
-    mlflow ui --backend-store-uri file:./mlruns
+    mlflow ui --backend-store-uri sqlite:///mlflow.db
     open http://localhost:5000
 
 By default this logs to ./mlruns. To log to DagsHub instead, run:

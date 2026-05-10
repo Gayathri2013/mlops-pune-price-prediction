@@ -4,7 +4,7 @@ For each alpha in params.yaml `sweep.alphas`, train a fresh Voting Regressor
 (LR + Ridge(alpha) + Lasso(default)), score it on the held-out test set,
 and log the run to MLflow. After this script finishes you can:
 
-    mlflow ui --backend-store-uri file:./mlruns
+    mlflow ui --backend-store-uri sqlite:///mlflow.db
 
 …sort by `metrics.r2` to find the best alpha, or use the parallel-coordinates
 plot to see the alpha-vs-R² curve at a glance.
@@ -84,7 +84,7 @@ def main() -> list[dict]:
     print(f"⭐ Best ridge alpha: {best['alpha']}  →  R² = {best['r2']:.4f}")
     print(f"   Run ID: {best['run_id']}")
     print()
-    print("Inspect the full sweep with:  mlflow ui --backend-store-uri file:./mlruns")
+    # print("Inspect the full sweep with:  mlflow ui --backend-store-uri file:./mlruns")
     return results
 
 

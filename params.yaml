@@ -10,7 +10,7 @@ data:
   random_state: 42        # matches Lab 3 — keep this fixed for comparability
 
 ridge:
-  alpha: 1.0              # L2 regularization strength
+  alpha: 10              # L2 regularization strength
 
 lasso:
   alpha: 0.1              # L1 regularization strength
@@ -27,4 +27,4 @@ sweep:
   alphas: [0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
 
 mlflow:
-  experiment_name: M2_Pune_Real_Estate_Price
+  experiment_name: M2_Pune_Real_Estate_Price_v3

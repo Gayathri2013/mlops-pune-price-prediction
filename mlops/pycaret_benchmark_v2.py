@@ -104,6 +104,44 @@ def _score_pycaret_pipeline(predict_fn, final, X, y, pred_col_cache: list[str]):
     return {"rmse": _rmse(y, pred), "r2": _r2(y, pred)}
 
 
+def _patch_pycaret_mlflow_compat() -> None:
+    # Newer MLflow turned _active_run_stack into a ThreadLocalVariable and no
+    # longer pushes onto it from mlflow.start_run. PyCaret's mlflow_logger still
+    # treats it as a list and indexes [-1] after start_run — both break.
+    # Fix: rebind it to a real list (so set_active_mlflow_run's append/remove
+    # work), and replace clean_active_mlflow_run with a no-op (mlflow.start_run
+    # now manages its own active-run state, so wrapping it is unnecessary).
+    from contextlib import contextmanager
+    import pycaret.loggers.mlflow_logger as ml
+
+    ml._active_run_stack = []
+
+    @contextmanager
+    def _noop():
+        yield
+
+    ml.clean_active_mlflow_run = _noop
+
+
+def _silence_noisy_loggers() -> None:
+    # MLflow chats at WARNING with deprecation/safety notes on every model save.
+    import logging
+    logging.getLogger("mlflow").setLevel(logging.ERROR)
+
+    # LightGBM emits "No further splits with positive gain" from the C++ side
+    # via its registered logger — replace with a sink that drops everything.
+    try:
+        import lightgbm as lgb
+
+        class _SilentLogger:
+            def info(self, msg): pass
+            def warning(self, msg): pass
+
+        lgb.register_logger(_SilentLogger())
+    except ImportError:
+        pass
+
+
 # ── Main ─────────────────────────────────────────────────────────────────────
 def main() -> dict:
     # PyCaret is imported inside main() so a learner who hasn't installed it
@@ -113,6 +151,8 @@ def main() -> dict:
             compare_models, finalize_model, predict_model, pull,
             save_model, setup, tune_model,
         )
+        _patch_pycaret_mlflow_compat()
+        _silence_noisy_loggers()
     except ImportError as exc:
         raise SystemExit(
             "PyCaret is not installed. Run:\n"
@@ -149,7 +189,7 @@ def main() -> dict:
         normalize=True,
         verbose=True,
         html=True,
-        log_experiment=False,    # we run a separate MLflow script
+        log_experiment=True,    # we run a separate MLflow script
     )
 
     # 4. compare_models — train and rank ~20 algorithms by R².
