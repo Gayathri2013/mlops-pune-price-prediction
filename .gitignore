@@ -43,8 +43,6 @@ catboost_info/
 
 # ── Notebook checkpoints ──────────────────────────────────────────────────
 .ipynb_checkpoints/
-/model_features.csv
-/model_target.npy
 
 # ── Instructor-only materials ─────────────────────────────────────────────
 .instructor/
@@ -55,3 +53,17 @@ catboost_info/
 *.tar.gz
 *.tgz
 *.7z
+
+
+# Pipeline outputs — managed by DVC (declared in dvc.yaml outs)
+model_features.csv
+model_target.npy
+data_cleaned.csv
+
+# Anything inside model/ except the .dvc pointer files DVC may create
+model/*.pkl
+model/*.sav
+
+# But keep DVC pointer files in Git — they're the contract between Git and DVC
+!*.dvc
+!.dvc/
