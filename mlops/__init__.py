@@ -30,3 +30,21 @@ try:
     _load_dotenv(_Path(__file__).resolve().parent.parent / ".env", override=False)
 except ImportError:
     pass
+
+# If DAGSHUB_* credentials are present and MLFLOW_TRACKING_URI is NOT,
+# auto-derive the MLflow URI + basic-auth vars so every `python -m mlops.x`
+# logs to DagsHub instead of the local SQLite DB. To force local logging
+# despite DagsHub creds, set MLFLOW_TRACKING_URI explicitly (in .env or shell).
+import os as _os
+if (
+    not _os.environ.get("MLFLOW_TRACKING_URI")
+    and _os.environ.get("DAGSHUB_USER")
+    and _os.environ.get("DAGSHUB_TOKEN")
+    and _os.environ.get("DAGSHUB_REPO")
+):
+    _os.environ["MLFLOW_TRACKING_URI"] = (
+        f"https://dagshub.com/{_os.environ['DAGSHUB_USER']}/"
+        f"{_os.environ['DAGSHUB_REPO']}.mlflow"
+    )
+    _os.environ.setdefault("MLFLOW_TRACKING_USERNAME", _os.environ["DAGSHUB_USER"])
+    _os.environ.setdefault("MLFLOW_TRACKING_PASSWORD", _os.environ["DAGSHUB_TOKEN"])
