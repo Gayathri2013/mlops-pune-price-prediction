@@ -45,3 +45,13 @@ catboost_info/
 .ipynb_checkpoints/
 /model_features.csv
 /model_target.npy
+
+# ── Instructor-only materials ─────────────────────────────────────────────
+.instructor/
+
+# ── Archives / backups ────────────────────────────────────────────────────
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z

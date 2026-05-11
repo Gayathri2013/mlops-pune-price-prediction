@@ -9,6 +9,7 @@ __pycache__/
 # Don't try to track the MLflow store with DVC — it has its own backend.
 mlruns/
 mlflow.db
+mlflow.db-journal
 mlartifacts/
 
 # Don't track the DVC remote folder itself with DVC. That would be weird.
@@ -16,3 +17,16 @@ dvc_remote/
 
 # Don't track outputs of derived analysis runs (those are reports, not data)
 metrics/*.png
+
+# Instructor-only materials — never enter the DVC cache.
+.instructor/
+
+# Archives / backups — never tracked by DVC.
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z
+
+# Logs — not data.
+*.log

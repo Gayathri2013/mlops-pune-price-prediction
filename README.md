@@ -142,6 +142,51 @@ python -m mlops.dagshub_setup --check
 python -m mlops.dagshub_setup --print-dvc-cmds
 ```
 
+### 4. Resetting MLflow tracking (start clean)
+
+Want a fresh MLflow dashboard? You need to delete **both** stores — the
+SQLite DB (run metadata) and the `mlruns/` directory (logged model
+artifacts and plots). Orphaning one without the other leaves dead weight
+and broken artifact links.
+
+**Step 1 — stop the UI first.** On Windows the running `mlflow ui`
+process holds a lock on `mlflow.db`; deleting it while the UI is up
+fails with "file in use." `Ctrl+C` in that terminal.
+
+**Step 2 — delete the stores from the project root:**
+
+```powershell
+# Windows PowerShell
+Remove-Item -Force .\mlflow.db
+Remove-Item -Recurse -Force .\mlruns
+```
+
+```bash
+# macOS / Linux
+rm -f mlflow.db
+rm -rf mlruns
+```
+
+**Step 3 — restart the UI:**
+
+```bash
+mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
+
+The next training/benchmark run will recreate `mlflow.db` and
+`mlruns/` automatically. After this reset, all three logging sources
+write to the same store:
+
+| Command | Experiment name |
+|---|---|
+| `python -m mlops.mlflow_train` | `M2_Pune_Real_Estate_Price` |
+| `python -m mlops.mlflow_train_v2` | `M2_Pune_Real_Estate_Price_v2` |
+| `python -m mlops.pycaret_benchmark_v3` | `M2_Pune_Real_Estate_Price_PyCaret` |
+
+**Warning:** this is destructive — every prior run and logged model
+artifact is lost. The `model/*.pkl` files in your repo are separate
+and won't be touched.
+
 ---
 
 ## Configuration
