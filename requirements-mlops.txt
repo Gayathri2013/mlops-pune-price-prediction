@@ -9,6 +9,11 @@
 mlflow>=3.0.0,<4.0.0
 pyyaml>=6.0
 
+# ─── Secrets / config from .env ─────────────────────────────────────
+# Loaded by mlops/__init__.py so DAGSHUB_* / MLFLOW_* env vars in a
+# project-root .env file get picked up by every `python -m mlops.*`.
+python-dotenv>=1.0.0
+
 # ─── Data versioning ────────────────────────────────────────────────
 # dvc[s3] gives us the boto3 driver so an S3 remote works out of the box.
 # If you only ever use a local folder or DagsHub remote, plain `dvc` is enough.

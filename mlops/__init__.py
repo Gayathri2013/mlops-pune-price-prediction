@@ -18,3 +18,15 @@ for _stream in (sys.stdout, sys.stderr):
         _stream.reconfigure(encoding="utf-8", errors="replace")
     except (AttributeError, OSError):
         pass
+
+# Load .env from the project root (one level up from this package) so
+# DAGSHUB_USER / DAGSHUB_TOKEN / MLFLOW_TRACKING_URI etc. don't need to be
+# exported manually each shell. Real env vars take precedence over .env.
+# python-dotenv is optional — if missing, .env is silently ignored.
+try:
+    from pathlib import Path as _Path
+    from dotenv import load_dotenv as _load_dotenv
+
+    _load_dotenv(_Path(__file__).resolve().parent.parent / ".env", override=False)
+except ImportError:
+    pass
