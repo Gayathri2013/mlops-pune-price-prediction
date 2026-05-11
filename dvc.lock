@@ -1,0 +1,98 @@
+schema: '2.0'
+stages:
+  clean:
+    cmd: python -m mlops.clean_data
+    deps:
+    - path: Pune Real Estate Data.xlsx
+      hash: md5
+      md5: 702262cebfa7e3dd7e2a5b743c39c572
+      size: 50764
+    - path: mlops/clean_data.py
+      hash: md5
+      md5: 6d3454a20a52966e308e33f29a07ecbe
+      size: 7212
+    outs:
+    - path: data_cleaned.csv
+      hash: md5
+      md5: cc1e99fa9b40a9a4029af6167745965b
+      size: 66755
+  features:
+    cmd: python -m mlops.build_features
+    deps:
+    - path: data_cleaned.csv
+      hash: md5
+      md5: cc1e99fa9b40a9a4029af6167745965b
+      size: 66755
+    - path: mlops/build_features.py
+      hash: md5
+      md5: 3f1e73cc04aadccc1292e7705aa22edf
+      size: 9089
+    outs:
+    - path: model/all_feature_names.pkl
+      hash: md5
+      md5: a270f141d472650ae0f4ba4d32427e54
+      size: 458
+    - path: model/amenities_score_price_map.pkl
+      hash: md5
+      md5: a7c73e3d12552532565b959a315c1b68
+      size: 71
+    - path: model/count_vectorizer.pkl
+      hash: md5
+      md5: 0f0d3799d792f1ae3f795b26355c2948
+      size: 47243
+    - path: model/feature_cols.pkl
+      hash: md5
+      md5: 133cd56fbfa370cdebab918a0f24c3b1
+      size: 282
+    - path: model/sub_area_price_map.pkl
+      hash: md5
+      md5: ac9bca919d08c2b95878df9b9cac52bf
+      size: 731
+    - path: model_features.csv
+      hash: md5
+      md5: 0c08a19eb81808876d57efa8c378aa87
+      size: 17287
+    - path: model_target.npy
+      hash: md5
+      md5: 71fb664dda91bed64aac84ea5f69cbbd
+      size: 1720
+  train:
+    cmd: python -m mlops.train
+    deps:
+    - path: mlops/train.py
+      hash: md5
+      md5: 143f48c20397c9147a2c783574e6b994
+      size: 3441
+    - path: mlops/utils.py
+      hash: md5
+      md5: 38e8d96c15a55f8d99e125350f4e141d
+      size: 7870
+    - path: model_features.csv
+      hash: md5
+      md5: 0c08a19eb81808876d57efa8c378aa87
+      size: 17287
+    - path: model_target.npy
+      hash: md5
+      md5: 71fb664dda91bed64aac84ea5f69cbbd
+      size: 1720
+    params:
+      params.yaml:
+        data.random_state: 42
+        data.test_size: 0.2
+        interval.confidence: 0.95
+        lasso.alpha: 0.1
+        lasso.max_iter: 10000
+        ridge.alpha: 10
+    outs:
+    - path: metrics/train_metrics.json
+      hash: md5
+      md5: d708a00040dc3efbc7956b8b8ad456a8
+      size: 214
+    - path: model/interval_est.pkl
+      hash: md5
+      md5: 8df3b1b74816fa6eacf4d9d567e0f2dd
+      size: 73
+    - path: model/property_price_prediction_voting.sav
+      hash: md5
+      md5: 0c21d18cf00dcab3dde7851e87a62263
+      size: 5435
